@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Weekendlah.xyz - Your ultimate travel affiliate for the best flights, hotels, and weekend getaway guides.">
+    <meta name="keywords" content="travel, weekend, flights, hotels, guides, weekendlah, cheap flights, KAYAK flights">
+    <title>Weekendlah.xyz | Weekend Getaways, Flights & Hotels</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#ff690f', /* Kayak Orange */
+                        secondary: '#0082c3', /* HotelsCombined Blue */
+                        dark: '#0f172a',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #334155; }
+        .hero-pattern {
+            background-color: #0082c3; /* HotelsCombined Blue as base for hero */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #ff690f;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Social Proof FOMO animation */
+        @keyframes popupSlide {
+            0% { transform: translate(-50%, 20px); opacity: 0; }
+            10% { transform: translate(-50%, 0); opacity: 1; }
+            90% { transform: translate(-50%, 0); opacity: 1; }
+            100% { transform: translate(-50%, -20px); opacity: 0; }
+        }
+        .fomo-popup {
+            animation: popupSlide 6s ease-in-out infinite;
+        }
+
+        /* Invisible AdSense slot ready for Google injects */
+        .adsense-slot {
+            display: block;
+            width: 100%;
+            margin: 1rem 0;
+            min-height: 1px; /* Hidden until loaded */
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const AdSenseSlot = ({ className = "h-24" }) => (
+            <div className={`adsense-slot ${className}`} aria-label="Advertisement">
+                {/* Google AdSense code will inject <ins> tags here automatically based on auto-ads or manual insertion */}
+            </div>
+        );
+
+        const destinations = [
+            { id: 1, name: "Bali, Indonesia", image: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=400&q=80", tag: "Beach & Culture" },
+            { id: 2, name: "Kyoto, Japan", image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=400&q=80", tag: "Historic" },
+            { id: 3, name: "Paris, France", image: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=400&q=80", tag: "Romantic" },
+            { id: 4, name: "New York, USA", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=400&q=80", tag: "Urban Explorer" },
+        ];
+
+        const initialDestinationsList = ['Bali', 'Kyoto', 'Paris', 'New York', 'London', 'Tokyo', 'Sydney', 'Rome', 'Seoul', 'Istanbul'];
+        
+        const legalData = {
+            about: {
+                title: "About Us",
+                content: (
+                    <div className="space-y-4 text-gray-600 leading-relaxed">
+                        <p>Welcome to Weekendlah.xyz, a travel website created for Malaysians who love quick getaways, budget holidays, and memorable weekend adventures.</p>
+                        <p>Our mission is simple. To help you discover the best places to visit, where to stay, what to do, and how to travel smarter without spending more than you need.</p>
+                        <p>At Weekendlah.xyz, we share travel guides, hotel recommendations, itinerary ideas, and useful tips for destinations in Malaysia and nearby countries such as Singapore, Thailand, Indonesia, Vietnam, and Japan.</p>
+                        <p>Some articles may contain affiliate links to booking platforms and travel services. If you make a purchase through these links, we may earn a small commission at no extra cost to you. This helps us keep the website running and continue creating helpful content for Malaysian travellers.</p>
+                        <p>Whether you are planning a short weekend trip, a family holiday, or a spontaneous road trip, Weekendlah.xyz is here to inspire your next adventure.</p>
+                    </div>
+                )
+            },
+            privacy: {
+                title: "Privacy Policy",
+                content: (
+                    <div className="space-y-4 text-gray-600 leading-relaxed">
+                        <p>At Weekendlah.xyz, your privacy matters to us.</p>
+                        <p>We may collect non-personal information such as your browser type, device information, pages visited, and cookies to improve website performance and user experience.</p>
+                        <p>If you contact us directly, we may collect information such as your name and email address.</p>
+                        <p>We use third-party services including Google Analytics and Google AdSense to understand website traffic and display relevant advertisements. These services may use cookies and similar technologies to collect data according to their own privacy policies.</p>
+                        <p>Our website also contains affiliate links to travel booking platforms, hotels, and travel products. Clicking on these links may allow third-party partners to track referrals.</p>
+                        <p>We do not sell or rent your personal information to third parties.</p>
+                        <p>By using this website, you agree to the terms of this Privacy Policy.</p>
+                    </div>
+                )
+            },
+            terms: {
+                title: "Terms & Conditions",
+                content: (
+                    <div className="space-y-4 text-gray-600 leading-relaxed">
+                        <p>By accessing and using Weekendlah.xyz, you agree to these Terms and Conditions.</p>
+                        <ul className="list-disc pl-6 space-y-2">
+                            <li>All content is provided for general informational and travel inspiration purposes only.</li>
+                            <li>You may use this website for personal and non-commercial purposes.</li>
+                            <li>You agree not to copy, reproduce, or republish our content without permission.</li>
+                            <li>We may update, modify, or remove content at any time without notice.</li>
+                            <li>We are not responsible for any losses, damages, or inconvenience arising from your use of this website.</li>
+                            <li>External websites linked from our content are governed by their own terms and policies.</li>
+                        </ul>
+                        <p>Continued use of this website means you accept these terms.</p>
+                    </div>
+                )
+            },
+            disclaimer: {
+                title: "Disclaimer",
+                content: (
+                    <div className="space-y-4 text-gray-600 leading-relaxed">
+                        <p>The information on Weekendlah.xyz is provided for general travel information and inspiration purposes only.</p>
+                        <p>While we strive to keep our content accurate and up to date, travel prices, visa requirements, hotel availability, and attraction details may change without notice.</p>
+                        <p>We do not guarantee the completeness, accuracy, or reliability of any information published on this website.</p>
+                        <p>Weekendlah.xyz participates in affiliate marketing programmes. This means we may earn a commission if you book hotels, tours, or travel services through our affiliate links, at no extra cost to you.</p>
+                        <p>Any travel decisions you make are your own responsibility. We recommend checking official sources and booking providers before confirming your plans.</p>
+                        <p>Your use of this website is at your own risk.</p>
+                    </div>
+                )
+            }
+        };
+
+        const Icon = ({ name, size = 24, className = "" }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current) {
+                    iconRef.current.innerHTML = '';
+                    lucide.createIcons({
+                        icons: { [name]: lucide.icons[name] },
+                        nameAttr: 'data-lucide',
+                        attrs: { class: className, width: size, height: size }
+                    });
+                    const iconElement = document.createElement('i');
+                    iconElement.setAttribute('data-lucide', name);
+                    iconRef.current.appendChild(iconElement);
+                    lucide.createIcons({ root: iconRef.current });
+                }
+            }, [name, size, className]);
+            return <span ref={iconRef} className="inline-flex items-center justify-center"></span>;
+        };
+
+        const Navbar = ({ activeTab, handleNavigate }) => (
+            <nav className="bg-white shadow-sm sticky top-0 z-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16">
+                        <div className="flex items-center cursor-pointer" onClick={() => handleNavigate('flights')}>
+                            <Icon name="PlaneTakeoff" className="text-primary mr-2" size={28} />
+                            <span className="font-bold text-xl tracking-tight text-dark">Weekend<span className="text-primary">lah</span>.xyz</span>
+                        </div>
+                        <div className="hidden md:flex space-x-8 items-center">
+                            <button onClick={() => handleNavigate('flights')} className={`text-sm font-medium ${activeTab === 'flights' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-900'} pb-1 transition-colors`}>Flights</button>
+                            <button onClick={() => handleNavigate('hotels')} className={`text-sm font-medium ${activeTab === 'hotels' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-900'} pb-1 transition-colors`}>Hotels</button>
+                            <button onClick={() => handleNavigate('blog')} className={`text-sm font-medium ${activeTab === 'blog' ? 'text-primary border-b-2 border-primary' : 'text-gray-500 hover:text-gray-900'} pb-1 transition-colors`}>Blog</button>
+                        </div>
+                        <div className="flex items-center md:hidden">
+                            <Icon name="Menu" className="text-gray-500" />
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        );
+
+        const SearchForm = ({ type }) => {
+            const [loading, setLoading] = useState(false);
+            const [results, setResults] = useState(null);
+            
+            const [origin, setOrigin] = useState('');
+            const [destination, setDestination] = useState('');
+            const [date, setDate] = useState('');
+
+            const handleSearch = (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setResults(null);
+
+                setTimeout(() => {
+                    if (type === 'flights') {
+                        setResults([
+                            { id: 1, airline: "Malaysia Airlines", price: "RM450", duration: "2h 30m", time: "08:00 AM - 10:30 AM", route: `${origin || 'KUL'} → ${destination || 'BKI'}` },
+                            { id: 2, airline: "AirAsia", price: "RM220", duration: "2h 35m", time: "10:00 AM - 12:35 PM", route: `${origin || 'KUL'} → ${destination || 'BKI'}` },
+                            { id: 3, airline: "Batik Air", price: "RM380", duration: "2h 45m", time: "11:30 PM - 02:15 AM", route: `${origin || 'KUL'} → ${destination || 'BKI'}` }
+                        ]);
+                    } else {
+                        setResults([
+                            { id: 1, name: "Grand Plaza Resort", price: "RM250/night", rating: "4.8", location: destination || "City Center", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=200&q=80" },
+                            { id: 2, name: "Boutique Inn", price: "RM150/night", rating: "4.5", location: destination || "Old Town", image: "https://images.unsplash.com/photo-1551882547-ff40c0d5b9af?auto=format&fit=crop&w=200&q=80" }
+                        ]);
+                    }
+                    setLoading(false);
+                }, 1500);
+            };
+
+            return (
+                <div className="relative mt-8 sm:-mt-16 z-10 w-full max-w-4xl mx-auto">
+                    {/* Social Proof (FOMO) Popup */}
+                    {type === 'flights' && (
+                        <div className="absolute left-1/2 top-[-60px] transform -translate-x-1/2 bg-dark/90 text-white text-sm px-4 py-2 rounded-full shadow-lg whitespace-nowrap z-50 flex items-center gap-2 fomo-popup border border-white/10 backdrop-blur-sm pointer-events-none">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            <span className="font-medium">Ali dari Johor baru booking penerbangan ke Tokyo!</span>
+                        </div>
+                    )}
+
+                    <div className="bg-white rounded-xl shadow-xl p-6 border border-gray-100">
+                        <div className="flex space-x-4 mb-6 border-b pb-4">
+                            <div className="flex items-center text-primary font-semibold">
+                                <Icon name={type === 'flights' ? 'Plane' : 'Building2'} size={20} className="mr-2" />
+                                Search {type === 'flights' ? 'Flights' : 'Hotels'}
+                            </div>
+                        </div>
+
+                        <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-4">
+                            <div className="flex-1 relative">
+                                <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">{type === 'flights' ? 'From' : 'Destination'}</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                        <Icon name={type === 'flights' ? 'MapPin' : 'Search'} size={18} />
+                                    </span>
+                                    <input 
+                                        type="text" 
+                                        placeholder={type === 'flights' ? "City or Airport (e.g. KUL)" : "City, hotel name, etc."}
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                        value={origin}
+                                        onChange={(e) => setOrigin(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            {type === 'flights' && (
+                                <div className="flex-1 relative">
+                                    <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">To</label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                            <Icon name="MapPin" size={18} />
+                                        </span>
+                                        <input 
+                                            type="text" 
+                                            placeholder="City or Airport (e.g. NRT)"
+                                            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
+                                            value={destination}
+                                            onChange={(e) => setDestination(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="flex-1 relative">
+                                <label className="block text-xs font-medium text-gray-500 mb-1 uppercase tracking-wide">Dates</label>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                        <Icon name="Calendar" size={18} />
+                                    </span>
+                                    <input 
+                                        type="date" 
+                                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-gray-700"
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-end">
+                                <button 
+                                    type="submit" 
+                                    disabled={loading}
+                                    className="w-full md:w-auto px-8 py-3 bg-primary hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center min-w-[120px]"
+                                >
+                                    {loading ? <div className="loader"></div> : 'Search'}
+                                </button>
+                            </div>
+                        </form>
+
+                        {/* Search Results Display */}
+                        {results && (
+                            <div className="mt-8 animate-in fade-in duration-300">
+                                <h3 className="text-lg font-semibold mb-4 text-dark">Top Deals Found</h3>
+                                <div className="space-y-4">
+                                    {type === 'flights' ? results.map(flight => (
+                                        <div key={flight.id} className="flex flex-col sm:flex-row justify-between items-center p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow bg-gray-50/50">
+                                            <div className="flex items-center space-x-4 mb-4 sm:mb-0 w-full sm:w-auto">
+                                                <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-primary">
+                                                    <Icon name="Plane" size={20} />
+                                                </div>
+                                                <div>
+                                                    <p className="font-semibold text-dark">{flight.airline}</p>
+                                                    <p className="text-sm text-gray-500">{flight.route}</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-center w-full sm:w-auto mb-4 sm:mb-0">
+                                                <p className="font-medium">{flight.time}</p>
+                                                <p className="text-xs text-gray-500">{flight.duration} • Non-stop</p>
+                                            </div>
+                                            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto space-x-4">
+                                                <div className="text-right">
+                                                    <p className="text-xl font-bold text-dark">{flight.price}</p>
+                                                </div>
+                                                <button className="px-4 py-2 bg-primary text-white font-medium rounded-md hover:bg-orange-600 transition-colors">
+                                                    Select
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )) : results.map(hotel => (
+                                        <div key={hotel.id} className="flex flex-col sm:flex-row p-4 border border-gray-100 rounded-lg hover:shadow-md transition-shadow bg-gray-50/50 gap-4">
+                                            <img src={hotel.image} alt={hotel.name} className="w-full sm:w-32 h-24 object-cover rounded-md" />
+                                            <div className="flex-1 flex flex-col justify-center">
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <h4 className="font-semibold text-lg text-dark">{hotel.name}</h4>
+                                                        <p className="text-sm text-gray-500 flex items-center mt-1">
+                                                            <Icon name="MapPin" size={14} className="mr-1" /> {hotel.location}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex items-center bg-blue-100 text-secondary px-2 py-1 rounded text-sm font-medium">
+                                                        <Icon name="Star" size={14} className="mr-1 fill-current" /> {hotel.rating}
+                                                    </div>
+                                                </div>
+                                                <div className="mt-auto flex justify-between items-end pt-2">
+                                                    <div>
+                                                        <span className="text-xl font-bold text-dark">{hotel.price}</span>
+                                                    </div>
+                                                    <button className="px-4 py-2 bg-secondary text-white font-medium rounded-md hover:bg-blue-700 transition-colors">
+                                                        View Deal
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-xs text-center text-gray-400 mt-4">
+                                    Affiliate disclaimer: We may earn a commission if you book through these links.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const baseKeywordsList = [
+            "weekend in Malaysia", 
+            "2 days 1 night trip in Malaysia for family", 
+            "Short trip in Malaysia for family",
+            "Short getaway in Malaysia for couples", 
+            "Weekend in malaysia kuala lumpur", 
+            "Short getaway from Malaysia",
+            "Staycation Malaysia", 
+            "Short getaway from KL", 
+            "Budget weekend getaway KL"
+        ];
+
+        const locationsList = ['Kuala Lumpur', 'Penang', 'Langkawi', 'Melaka', 'Johor Bahru', 'Ipoh', 'Cameron Highlands', 'Genting Highlands', 'Kota Kinabalu', 'Kuching'];
+
+        const blogArticles = Array.from({ length: 30 }, (_, i) => {
+            const keyword = baseKeywordsList[i % baseKeywordsList.length];
+            const loc = locationsList[i % locationsList.length];
+            const capitalizedKeyword = keyword.replace(/\b\w/g, l => l.toUpperCase());
+            const title = `${capitalizedKeyword}: Ultimate Guide in ${loc} (2026)`;
+            const slug = `${keyword.replace(/\s+/g, '-')}-${loc.toLowerCase()}-${i + 1}`;
+            const metaDescription = `Planning a ${keyword}? Discover the best itineraries, budget tips, and top spots for a perfect trip in ${loc}. Read our expert 2026 travel guide.`;
+            
+            // Menggunakan AI Image Generator API (menjana gambar secara automatik berdasarkan keyword dan lokasi sebenar)
+            const imagePrompt = `Beautiful travel photography of ${loc} Malaysia, ${keyword}, scenic tourist attraction, sunny day, high quality, 8k`;
+            const aiImageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1200&height=800&nologo=true`;
+            
+            // DITAMBAH kelas margin (mb-6, mt-12 dll) pada tag HTML supaya susunan perenggan kemas dan mudah dibaca (tidak rapat)
+            const content = `
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">Why You Need a ${capitalizedKeyword} This Year</h2>
+                <p class="mb-6 leading-relaxed">When searching for the perfect <strong>${keyword}</strong>, ${loc} stands out as a premier destination that perfectly balances accessibility with rich cultural experiences. In today's fast-paced world, taking a short getaway is no longer just a luxury; it is an essential mental reset. Whether you are seeking culinary adventures, historic explorations, or just pure relaxation, a ${keyword} provides the perfect opportunity to disconnect from the daily grind and reconnect with yourself and your loved ones.</p>
+                <p class="mb-6 leading-relaxed">According to recent travel and wellness data, taking frequent, shorter trips like a ${keyword} can significantly reduce cortisol levels and improve long-term productivity. ${loc}, with its unique blend of modern infrastructure and deep-rooted heritage, offers an unparalleled canvas for your next adventure. From navigating the bustling local markets to enjoying the serene landscapes just outside the city center, the semantic richness of ${loc}'s tourism ecosystem ensures that every traveler finds their niche.</p>
+                <p class="mb-8 leading-relaxed">Furthermore, as we look towards travel trends in 2026, the emphasis is heavily shifting towards sustainable, localized travel. Choosing ${loc} for your ${keyword} means supporting local economies, enjoying authentic culinary delights, and minimizing your carbon footprint by exploring nearby gems rather than embarking on exhaustive long-haul flights.</p>
+
+                <div class="bg-blue-50 p-6 rounded-xl mb-10 border-l-4 border-secondary shadow-sm">
+                    <h3 class="font-bold text-dark text-xl mb-4">Key Takeaways for Your Trip</h3>
+                    <ul class="list-disc pl-6 text-gray-700 space-y-3">
+                        <li><strong>Optimal Planning:</strong> Secure accommodations and domestic flights at least 3-4 weeks ahead to guarantee the best rates in ${loc}.</li>
+                        <li><strong>Budget Focus:</strong> With smart planning, you can comfortably enjoy this premium trip for under RM400-RM600 per person.</li>
+                        <li><strong>Transportation Strategy:</strong> Utilize Grab (e-hailing) for longer distances, but prioritize walking in historical or central districts to uncover hidden gems.</li>
+                        <li><strong>Culinary Prioritization:</strong> Skip international chains and focus on local <em>Kopitiams</em> and <em>Pasar Malams</em> for an authentic, cost-effective culinary journey.</li>
+                        <li><strong>Timing is Everything:</strong> Start your days early (by 8:00 AM) to avoid the intense afternoon tropical heat and the heavy tourist crowds at major attractions.</li>
+                    </ul>
+                </div>
+
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">The Ultimate 48-Hour Itinerary in ${loc}</h2>
+                <p class="mb-6 leading-relaxed">To maximize your ${keyword}, meticulous planning is vital. We have synthesized travel data, local expert insights, and user reviews to construct the most engaging yet accessible 48-hour schedule. This itinerary balances high-energy exploration with essential downtime.</p>
+                
+                <div class="overflow-x-auto my-8 mb-10">
+                    <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="py-4 px-4 border-b text-left text-sm font-semibold text-gray-800 uppercase tracking-wider">Day & Time</th>
+                                <th class="py-4 px-4 border-b text-left text-sm font-semibold text-gray-800 uppercase tracking-wider">Activity & Location</th>
+                                <th class="py-4 px-4 border-b text-left text-sm font-semibold text-gray-800 uppercase tracking-wider">Cost Estimate</th>
+                                <th class="py-4 px-4 border-b text-left text-sm font-semibold text-gray-800 uppercase tracking-wider">Pro-Tip</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-700">
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 border-b font-medium">Day 1 - 08:00 AM</td>
+                                <td class="py-3 px-4 border-b">Authentic Local Breakfast (Nasi Lemak / Dim Sum) & Heritage Walk</td>
+                                <td class="py-3 px-4 border-b">RM 15 - RM 30</td>
+                                <td class="py-3 px-4 border-b text-sm">Arrive early to beat the queues at viral spots.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors bg-gray-50/30">
+                                <td class="py-3 px-4 border-b font-medium">Day 1 - 11:30 AM</td>
+                                <td class="py-3 px-4 border-b">Explore Primary Cultural Sites / Main Museum</td>
+                                <td class="py-3 px-4 border-b">RM 20 - RM 50</td>
+                                <td class="py-3 px-4 border-b text-sm">Book entry tickets online via affiliate links.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 border-b font-medium">Day 1 - 03:00 PM</td>
+                                <td class="py-3 px-4 border-b">Café Hopping & Artisan Boutique Shopping</td>
+                                <td class="py-3 px-4 border-b">RM 40 - RM 80</td>
+                                <td class="py-3 px-4 border-b text-sm">Perfect time to escape the afternoon heat.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors bg-gray-50/30">
+                                <td class="py-3 px-4 border-b font-medium">Day 1 - 07:30 PM</td>
+                                <td class="py-3 px-4 border-b">Night Market (Pasar Malam) or Street Food Dinner</td>
+                                <td class="py-3 px-4 border-b">RM 25 - RM 50</td>
+                                <td class="py-3 px-4 border-b text-sm">Bring small cash notes for easier transactions.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="py-3 px-4 border-b font-medium">Day 2 - 07:00 AM</td>
+                                <td class="py-3 px-4 border-b">Nature Trail, Beach Walk, or Scenic Viewpoint Hike</td>
+                                <td class="py-3 px-4 border-b">Free - RM 15</td>
+                                <td class="py-3 px-4 border-b text-sm">Wear highly breathable, moisture-wicking clothing.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 transition-colors bg-gray-50/30">
+                                <td class="py-3 px-4 border-b font-medium">Day 2 - 01:00 PM</td>
+                                <td class="py-3 px-4 border-b">Farewell Lunch & Last-Minute Souvenir Shopping</td>
+                                <td class="py-3 px-4 border-b">RM 50 - RM 100</td>
+                                <td class="py-3 px-4 border-b text-sm">Look for locally produced handicrafts.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-xl md:text-2xl font-bold text-dark mt-10 mb-4">Deep Dive: Exploring the Heart of ${loc}</h3>
+                <p class="mb-6 leading-relaxed">When executing your ${keyword}, diving deeper into what makes ${loc} unique is crucial. It is not just about visiting the tourist traps; it is about immersing yourself in the socio-cultural fabric of the destination. The architecture alone tells a story of historical trade routes, colonial influences, and modern economic booms. As you walk through the streets, take note of how historical preservation meets contemporary lifestyle.</p>
+                <p class="mb-6 leading-relaxed">For food enthusiasts, ${loc} is nothing short of a paradise. The culinary landscape is heavily dictated by its demographic diversity. From sizzling street food woks that command lines of hungry locals to modern fusion restaurants pushing the boundaries of gastronomy, every meal is an event. We strongly advise allocating a significant portion of your budget and itinerary simply to dining. Trying the local specialties is an undisputed highlight of any ${keyword}.</p>
+                <p class="mb-8 leading-relaxed">Furthermore, the environmental allure of ${loc} cannot be overstated. Depending on the exact geography, you are never too far from a stunning natural escape. Whether it is a quick 30-minute drive to a cascading waterfall, a quiet stretch of coastal beach, or a manicured urban park offering a green lung amidst the concrete, nature is deeply integrated into the travel experience here.</p>
+
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">Accommodation Guide: Where to Stay in ${loc}</h2>
+                <p class="mb-6 leading-relaxed">Selecting the right accommodation can make or break your ${keyword}. Your choice of hotel or staycation spot dictates your logistical ease and sets the tone for your evenings. In ${loc}, the accommodation spectrum is incredibly broad, catering to backpackers and luxury seekers alike.</p>
+                
+                <h3 class="text-xl md:text-2xl font-bold text-dark mt-10 mb-4">Boutique Hotels vs. Luxury Resorts</h3>
+                <p class="mb-6 leading-relaxed">For those looking to maximize cultural immersion, boutique heritage hotels offer unparalleled charm. Often situated in restored pre-war buildings, these establishments provide personalized service, unique architectural aesthetics, and proximity to historical epicenters. Conversely, if your goal for this ${keyword} is pure, unadulterated relaxation, ${loc} features several world-class resorts and high-rise luxury hotels equipped with infinity pools, full-service spas, and premium dining options right on the premises.</p>
+                <p class="mb-8 leading-relaxed"><strong>Expert Tip:</strong> When booking through our recommended platforms, always cross-reference the hotel's location with your primary points of interest. Saving RM50 a night on a hotel situated 45 minutes away from the city center will quickly be offset by e-hailing costs and time lost in transit.</p>
+
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">Navigating ${loc}: Transportation Insights</h2>
+                <p class="mb-4 leading-relaxed">Efficient logistics are the backbone of a successful short trip. Fortunately, ${loc} offers a robust network of transportation options tailored for travelers executing a ${keyword}.</p>
+                <ul class="list-disc pl-6 mb-8 text-gray-700 space-y-3">
+                    <li><strong>E-Hailing Services:</strong> Applications like Grab are ubiquitous, generally safe, and highly affordable. They are the recommended mode of transport for point-to-point travel, especially in the evenings.</li>
+                    <li><strong>Public Transit:</strong> Depending on the infrastructure of ${loc}, utilizing trains (LRT/MRT) or local bus networks can be an incredibly cost-effective way to navigate. It also offers a slice-of-life perspective of the local daily commute.</li>
+                    <li><strong>Walking:</strong> Do not underestimate the walkability of certain districts. Many heritage zones and central commercial hubs in ${loc} are best explored on foot, allowing you to discover hidden street art, pop-up cafes, and spontaneous photo opportunities.</li>
+                </ul>
+
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">Budget Breakdown for Your ${keyword}</h2>
+                <p class="mb-6 leading-relaxed">Financial anxiety can quickly ruin a vacation. By setting a realistic budget for your ${keyword} in ${loc}, you ensure peace of mind. Here is a realistic semantic breakdown for a mid-range traveler:</p>
+                <p class="mb-2 leading-relaxed"><strong>1. Accommodation (RM150 - RM350/night):</strong> This secures a highly-rated 3 to 4-star hotel or a beautiful boutique guesthouse in a strategic location.</p>
+                <p class="mb-2 leading-relaxed"><strong>2. Food & Beverage (RM80 - RM150/day):</strong> This allows for a mix of legendary street food, comfortable café visits, and perhaps one upscale dining experience.</p>
+                <p class="mb-2 leading-relaxed"><strong>3. Transportation (RM30 - RM60/day):</strong> Covering airport transfers and internal e-hailing rides.</p>
+                <p class="mb-6 leading-relaxed"><strong>4. Attractions & Entertainment (RM50 - RM100/day):</strong> Entry fees to museums, parks, or specialty tours.</p>
+                <p class="mb-8 leading-relaxed">By adhering to these estimates, a fantastic ${keyword} in ${loc} is entirely achievable without breaking the bank, proving that world-class travel experiences are highly accessible.</p>
+
+                <div class="my-12 bg-gradient-to-r from-primary/10 via-white to-blue-50 p-10 rounded-2xl text-center border border-primary/20 shadow-lg relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
+                    <h3 class="text-3xl font-extrabold text-dark mb-4">Ready to Book Your ${capitalizedKeyword}?</h3>
+                    <p class="text-gray-600 mb-8 text-lg max-w-2xl mx-auto">Do not let this weekend slip away. Lock in the absolute best rates before availability drops. Compare flight and hotel prices across hundreds of booking sites instantly using our powerful travel engine.</p>
+                    <button class="px-10 py-4 bg-primary text-white font-bold text-lg rounded-xl hover:bg-orange-600 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 flex items-center justify-center mx-auto" onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.querySelectorAll('button').forEach(b => {if(b.textContent.includes('Flights')) b.click()});">
+                        Search Flights & Hotels to ${loc} Now
+                        <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                    <p class="text-xs text-gray-400 mt-4">Secure booking via Weekendlah.xyz. Best price guarantee.</p>
+                </div>
+
+                <hr class="my-10 border-gray-200"/>
+
+                <h2 class="text-2xl md:text-3xl font-bold text-dark mt-12 mb-6 pb-2 border-b border-gray-100">Frequently Asked Questions (FAQ) About Visiting ${loc}</h2>
+                <div class="space-y-6 mt-6 mb-8" itemscope itemtype="https://schema.org/FAQPage">
+                    
+                    <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" class="bg-white border border-gray-100 shadow-sm p-6 rounded-xl hover:shadow-md transition-shadow">
+                        <h4 class="font-bold text-xl text-dark mb-3 flex items-center" itemprop="name">
+                            <span class="text-primary mr-2">Q:</span> Is ${loc} a suitable destination for a ${keyword}?
+                        </h4>
+                        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p class="text-gray-700 leading-relaxed" itemprop="text">Absolutely. ${loc} provides the perfect infrastructure, a wide variety of accommodations ranging from budget to luxury, and an array of local attractions. These elements combine to make your ${keyword} unforgettable, seamless, and highly rewarding regardless of your travel style.</p>
+                        </div>
+                    </div>
+                    
+                    <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" class="bg-white border border-gray-100 shadow-sm p-6 rounded-xl hover:shadow-md transition-shadow">
+                        <h4 class="font-bold text-xl text-dark mb-3 flex items-center" itemprop="name">
+                            <span class="text-primary mr-2">Q:</span> What is the most efficient way to travel to ${loc}?
+                        </h4>
+                        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p class="text-gray-700 leading-relaxed" itemprop="text">Depending on your starting point, driving offers the most flexibility for road-trippers. However, for a true short getaway, flying via budget airlines often presents incredible time-saving opportunities and amazing deals if booked 2-4 weeks in advance using our flight comparison tool.</p>
+                        </div>
+                    </div>
+
+                    <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" class="bg-white border border-gray-100 shadow-sm p-6 rounded-xl hover:shadow-md transition-shadow">
+                        <h4 class="font-bold text-xl text-dark mb-3 flex items-center" itemprop="name">
+                            <span class="text-primary mr-2">Q:</span> How much budget should I prepare for 2 days in ${loc}?
+                        </h4>
+                        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p class="text-gray-700 leading-relaxed" itemprop="text">For a comfortable mid-range experience encompassing good food, comfortable 3-star to 4-star lodging, and basic attractions, budgeting between RM400 to RM600 per person is highly recommended. Backpackers can easily manage on half of that amount by leveraging hostels and street food.</p>
+                        </div>
+                    </div>
+
+                    <div itemscope itemprop="mainEntity" itemtype="https://schema.org/Question" class="bg-white border border-gray-100 shadow-sm p-6 rounded-xl hover:shadow-md transition-shadow">
+                        <h4 class="font-bold text-xl text-dark mb-3 flex items-center" itemprop="name">
+                            <span class="text-primary mr-2">Q:</span> When is the best time of year to plan this trip?
+                        </h4>
+                        <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+                            <p class="text-gray-700 leading-relaxed" itemprop="text">While ${loc} is a year-round destination due to its tropical climate, the optimal time is typically during the dry season (usually between March and October). However, visiting during off-peak monsoon months can yield massive discounts on luxury hotels and flights.</p>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <p class="mt-8 text-sm text-gray-500 italic leading-relaxed">Disclaimer: Travel prices, business operating hours, and weather conditions in ${loc} are subject to change. We recommend verifying final details directly with service providers before your departure.</p>
+            `;
+
+            return {
+                id: i + 1,
+                title: title,
+                slug: slug,
+                metaTitle: `${capitalizedKeyword} in ${loc} | Weekendlah 2026 Guide`,
+                metaDescription: metaDescription,
+                author: "Travelista",
+                date: new Date(Date.now() - (i * 86400000 * 3)).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                featuredImage: aiImageUrl,
+                imageAlt: `${keyword} destination in ${loc} - weekendlah-travel-guide-${i+1}.webp`,
+                schema: {
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "mainEntityOfPage": {
+                        "@type": "WebPage",
+                        "@id": `https://weekendlah.xyz/blog/${slug}`
+                    },
+                    "headline": title,
+                    "image": [aiImageUrl],
+                    "datePublished": new Date(Date.now() - (i * 86400000 * 3)).toISOString(),
+                    "author": { "@type": "Person", "name": "Travelista" },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "Weekendlah",
+                        "logo": { "@type": "ImageObject", "url": "https://weekendlah.xyz/logo.png" }
+                    },
+                    "description": metaDescription
+                },
+                content: content
+            };
+        });
+
+        const SEOBlogList = ({ onReadArticle }) => {
+            return (
+                <div className="py-16 bg-white">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="text-center mb-12">
+                            <h1 className="text-3xl md:text-4xl font-bold text-dark mb-4">Latest Travel Guides & Weekend Ideas</h1>
+                            <p className="text-gray-500 max-w-2xl mx-auto">Discover expert itineraries, budget tips, and the best staycation spots in Malaysia. Plan your next short getaway with our comprehensive guides.</p>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {blogArticles.map((article) => (
+                                <article key={article.id} className="bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col overflow-hidden group cursor-pointer" onClick={() => onReadArticle(article)}>
+                                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors z-10"></div>
+                                        <img 
+                                            src={article.featuredImage} 
+                                            alt={article.imageAlt} 
+                                            loading="lazy"
+                                            onError={(e) => { e.target.src = `https://placehold.co/1200x800/e2e8f0/475569?text=${encodeURIComponent(article.title)}`; }}
+                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                                        />
+                                    </div>
+                                    <div className="p-6 flex-grow flex flex-col">
+                                        <div className="flex items-center text-xs text-gray-500 mb-3 space-x-2">
+                                            <span className="flex items-center"><Icon name="Calendar" size={14} className="mr-1"/> {article.date}</span>
+                                        </div>
+                                        <h2 className="text-xl font-bold text-dark mb-3 group-hover:text-primary transition-colors line-clamp-2">{article.title}</h2>
+                                        <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-grow">{article.metaDescription}</p>
+                                        <div className="mt-auto pt-4 border-t border-gray-50">
+                                            <span className="text-secondary font-medium text-sm inline-flex items-center group-hover:underline">
+                                                Read Guide <Icon name="ArrowRight" size={14} className="ml-1" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const ArticleView = ({ article, onBack }) => {
+            useEffect(() => {
+                document.title = article.metaTitle;
+                const metaDesc = document.querySelector('meta[name="description"]');
+                if (metaDesc) metaDesc.setAttribute("content", article.metaDescription);
+                
+                return () => {
+                    document.title = "Weekendlah.xyz | Weekend Getaways, Flights & Hotels";
+                    if (metaDesc) metaDesc.setAttribute("content", "Weekendlah.xyz - Your ultimate travel affiliate for the best flights, hotels, and weekend getaway guides.");
+                };
+            }, [article]);
+
+            return (
+                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 mt-8 bg-white rounded-xl shadow-sm">
+                    {/* JSON-LD Schema Injection */}
+                    {article.schema && (
+                        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(article.schema) }} />
+                    )}
+                    
+                    <button onClick={onBack} className="flex items-center text-secondary hover:text-blue-800 font-medium mb-8 transition-colors">
+                        <Icon name="ArrowLeft" size={18} className="mr-2" /> Back to Blog
+                    </button>
+                    <article itemScope itemType="http://schema.org/Article">
+                        <meta itemProp="headline" content={article.title} />
+                        <meta itemProp="datePublished" content={article.date} />
+                        <meta itemProp="author" content={article.author} />
+                        
+                        <h1 className="text-3xl md:text-5xl font-extrabold text-dark mb-6 leading-tight" itemProp="name">{article.title}</h1>
+                        
+                        <div className="flex items-center text-sm text-gray-500 mb-8 pb-6 border-b border-gray-100">
+                            <span className="flex items-center mr-6"><Icon name="Calendar" size={16} className="mr-2"/> {article.date}</span>
+                            <span className="flex items-center"><Icon name="User" size={16} className="mr-2"/> By <span className="font-medium text-dark ml-1">{article.author}</span></span>
+                        </div>
+
+                        <div className="mb-10 rounded-xl overflow-hidden shadow-md bg-gray-100 min-h-[300px] relative">
+                             <div className="absolute inset-0 flex items-center justify-center text-gray-400">
+                                <span className="animate-pulse flex items-center"><Icon name="Image" size={24} className="mr-2 opacity-50" /> Generating AI Image...</span>
+                             </div>
+                             <img 
+                                src={article.featuredImage} 
+                                alt={article.imageAlt} 
+                                itemProp="image"
+                                onError={(e) => { e.target.src = `https://placehold.co/1200x800/e2e8f0/475569?text=${encodeURIComponent(article.title)}`; }}
+                                className="w-full h-auto max-h-[500px] object-cover relative z-10"
+                            />
+                        </div>
+                        
+                        <AdSenseSlot className="mb-10" />
+                        
+                        <div 
+                            className="text-gray-700 text-lg"
+                            dangerouslySetInnerHTML={{ __html: article.content }}
+                            itemProp="articleBody"
+                        />
+                        
+                        <AdSenseSlot className="mt-12" />
+                    </article>
+                </div>
+            );
+        };
+
+        const LegalPageView = ({ pageData }) => {
+            return (
+                <div className="max-w-4xl mx-auto px-4 py-12 mt-8 bg-white rounded-xl shadow-sm border border-gray-100">
+                    <h1 className="text-3xl font-bold text-dark mb-8 pb-4 border-b border-gray-100">{pageData.title}</h1>
+                    <div className="prose prose-lg text-gray-700 text-lg">
+                        {pageData.content}
+                    </div>
+                </div>
+            );
+        };
+
+        const Footer = ({ handleNavigateLegal }) => {
+            return (
+                <footer className="bg-dark text-white pt-12 pb-8 mt-auto border-t border-gray-800">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+                            <div className="text-center md:text-left">
+                                <div className="flex items-center justify-center md:justify-start mb-4">
+                                    <Icon name="PlaneTakeoff" className="text-primary mr-2" size={24} />
+                                    <span className="font-bold text-xl tracking-tight">Weekend<span className="text-primary">lah</span>.xyz</span>
+                                </div>
+                                <p className="text-gray-400 text-sm max-w-sm">
+                                    Your Ultimate Travel website created for Malaysians who love quick getaways, budget holidays, and memorable weekend adventures.
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-300">
+                                <button onClick={() => handleNavigateLegal('about')} className="hover:text-primary transition-colors">About Us</button>
+                                <button onClick={() => handleNavigateLegal('privacy')} className="hover:text-primary transition-colors">Privacy Policy</button>
+                                <button onClick={() => handleNavigateLegal('terms')} className="hover:text-primary transition-colors">Terms & Conditions</button>
+                                <button onClick={() => handleNavigateLegal('disclaimer')} className="hover:text-primary transition-colors">Disclaimer</button>
+                            </div>
+                        </div>
+                        
+                        <div className="border-t border-gray-800 mt-10 pt-8 text-center text-gray-500 text-sm">
+                            <p>© 2026 Weekendlah.xyz. Built with ❤️for Malaysian people.</p>
+                        </div>
+                    </div>
+                </footer>
+            );
+        };
+
+        const App = () => {
+            const [view, setView] = useState({ type: 'flights' });
+
+            const handleNavigate = (tab) => {
+                setView({ type: tab });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleReadArticle = (article) => {
+                setView({ type: 'article', data: article });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            const handleNavigateLegal = (page) => {
+                setView({ type: 'legal', page: page });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans">
+                    <Navbar activeTab={view.type} handleNavigate={handleNavigate} />
+                    
+                    <main className="flex-grow">
+                        {/* Hero Section - Hidden on Reading / Legal pages for better reading experience */}
+                        {(view.type !== 'article' && view.type !== 'legal') && (
+                            <div className="hero-pattern pt-20 pb-24 text-center px-4 sm:px-6 lg:px-8 relative">
+                                <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-6 drop-shadow-md">
+                                    Your Perfect <span className="text-primary">Weekend</span> Awaits
+                                </h1>
+                                <p className="mt-4 text-xl text-blue-100 max-w-2xl mx-auto font-light drop-shadow">
+                                    Search flights via Weekendlah.xyz, find top hotels, and explore our expert guides for your next escape.
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="px-4 sm:px-6 lg:px-8 pb-12">
+                            {/* Standard views */}
+                            {view.type === 'flights' && <SearchForm type="flights" />}
+                            {view.type === 'hotels' && <SearchForm type="hotels" />}
+
+                            {view.type === 'blog' && <SEOBlogList onReadArticle={handleReadArticle} />}
+                            {view.type === 'article' && <ArticleView article={view.data} onBack={() => handleNavigate('blog')} />}
+                            {view.type === 'legal' && <LegalPageView pageData={legalData[view.page]} />}
+                        </div>
+
+                        {/* Always show the blog list below the search forms on home pages for better SEO and discovery */}
+                        {(view.type === 'flights' || view.type === 'hotels') && <SEOBlogList onReadArticle={handleReadArticle} />}
+                    </main>
+
+                    <Footer handleNavigateLegal={handleNavigateLegal} />
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
