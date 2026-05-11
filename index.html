@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Weekendlah.xyz - Your ultimate travel affiliate for the best flights, hotels, and weekend getaway guides.">
-    <meta name="keywords" content="travel, weekend, flights, hotels, guides, weekendlah, cheap flights, KAYAK flights">
+    <meta name="description" content="Weekendlah.xyz - Your Ultimate Travel website created for Malaysians who love quick getaways, budget holidays, and memorable weekend adventures.">
+    <meta name="keywords" content="travel, weekend, flights, hotels, guides, weekendlah, cheap flights, KAYAK flights, weekend staycation">
     <title>Weekendlah.xyz | Weekend Getaways, Flights & Hotels</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -201,7 +201,7 @@
             const [date, setDate] = useState('');
 
             // State untuk Notifikasi FOMO Dinamik
-            const [fomoMsg, setFomoMsg] = useState("Ali dari Johor baru booking penerbangan ke Tokyo!");
+            const [fomoMsg, setFomoMsg] = useState("Ali from Johor just booked a flight to Tokyo!");
 
             useEffect(() => {
                 if (type !== 'flights') return;
@@ -215,7 +215,7 @@
                     const randomName = names[Math.floor(Math.random() * names.length)];
                     const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
                     const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
-                    setFomoMsg(`${randomName} dari ${randomOrigin} baru booking penerbangan ke ${randomDest}!`);
+                    setFomoMsg(`${randomName} from ${randomOrigin} just booked a flight to ${randomDest}!`);
                 }, 6000);
 
                 return () => clearInterval(interval);
