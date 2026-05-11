@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Weekendlah.xyz - Your Ultimate Travel website created for Malaysians who love quick getaways, budget holidays, and memorable weekend adventures.">
-    <meta name="keywords" content="travel, weekend, flights, hotels, guides, weekendlah, cheap flights, KAYAK flights, staycation,">
+    <meta name="description" content="Weekendlah.xyz - Your ultimate travel affiliate for the best flights, hotels, and weekend getaway guides.">
+    <meta name="keywords" content="travel, weekend, flights, hotels, guides, weekendlah, cheap flights, KAYAK flights">
     <title>Weekendlah.xyz | Weekend Getaways, Flights & Hotels</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,11 +71,6 @@
             min-height: 1px; /* Hidden until loaded */
         }
     </style>
-
-    <!-- Google AdSense Code -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7731632559017204"
-     crossorigin="anonymous"></script>
-    <!-- End Google AdSense Code -->
 </head>
 <body>
     <div id="root"></div>
@@ -205,6 +200,27 @@
             const [destination, setDestination] = useState('');
             const [date, setDate] = useState('');
 
+            // State untuk Notifikasi FOMO Dinamik
+            const [fomoMsg, setFomoMsg] = useState("Ali dari Johor baru booking penerbangan ke Tokyo!");
+
+            useEffect(() => {
+                if (type !== 'flights') return;
+
+                const names = ['Ali', 'Siti', 'Ahmad', 'Muthu', 'Mei Ling', 'Hafiz', 'Aisyah', 'Farid', 'Nadia', 'Chong', 'Azman', 'Diana', 'Karthik', 'Sarah'];
+                const origins = ['Johor', 'Penang', 'Melaka', 'Sabah', 'Sarawak', 'Kelantan', 'Terengganu', 'Pahang', 'Shah Alam', 'Ipoh', 'Seremban', 'Alor Setar', 'Kuantan', 'Bangi'];
+                const destinations = ['Tokyo', 'London', 'Bali', 'Seoul', 'Langkawi', 'Bangkok', 'Taipei', 'Istanbul', 'Paris', 'Sydney', 'Ho Chi Minh', 'Kyoto', 'Dubai', 'Osaka'];
+
+                // Tukar teks setiap 6 saat (selari dengan durasi animasi fomo-popup di CSS)
+                const interval = setInterval(() => {
+                    const randomName = names[Math.floor(Math.random() * names.length)];
+                    const randomOrigin = origins[Math.floor(Math.random() * origins.length)];
+                    const randomDest = destinations[Math.floor(Math.random() * destinations.length)];
+                    setFomoMsg(`${randomName} dari ${randomOrigin} baru booking penerbangan ke ${randomDest}!`);
+                }, 6000);
+
+                return () => clearInterval(interval);
+            }, [type]);
+
             const handleSearch = (e) => {
                 e.preventDefault();
                 setLoading(true);
@@ -233,7 +249,7 @@
                     {type === 'flights' && (
                         <div className="absolute left-1/2 top-[-60px] transform -translate-x-1/2 bg-dark/90 text-white text-sm px-4 py-2 rounded-full shadow-lg whitespace-nowrap z-50 flex items-center gap-2 fomo-popup border border-white/10 backdrop-blur-sm pointer-events-none">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <span className="font-medium">Ali dari Johor baru booking penerbangan ke Tokyo!</span>
+                            <span className="font-medium">{fomoMsg}</span>
                         </div>
                     )}
 
